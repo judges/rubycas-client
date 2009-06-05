@@ -95,6 +95,14 @@ module CASClient
 
                 end
                 
+                # Redirect to remove ticket from URL if configured to do so.
+                if controller.params[:ticket] && config[:remove_ticket_from_url]
+                  log.info("Removing ticket from params")
+                  ticketless_params = controller.params.dup
+                  ticketless_params.delete(:ticket)
+                  controller.send(:redirect_to, controller.url_for(ticketless_params))
+                end
+
                 return true
               else
                 log.warn("Ticket #{st.ticket.inspect} failed validation -- #{vr.failure_code}: #{vr.failure_message}")
@@ -134,6 +142,12 @@ module CASClient
           # action. 
           def login_url(controller)
             service_url = read_service_url(controller)
+            url = client.add_service_to_login_url(service_url)
+            log.debug("Generated login url: #{url}")
+            return url
+          end
+          
+          def explicit_login_url(service_url)
             url = client.add_service_to_login_url(service_url)
             log.debug("Generated login url: #{url}")
             return url

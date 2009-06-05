@@ -25,6 +25,7 @@ module CASClient
       
       @username_session_key         = conf[:username_session_key] || :cas_user
       @extra_attributes_session_key = conf[:extra_attributes_session_key] || :cas_extra_attributes
+      @redirect_back_after_logout   = conf[:redirect_back_after_logout]
       
       @log = CASClient::LoggerWrapper.new
       @log.set_real_logger(conf[:logger]) if conf[:logger]
@@ -68,6 +69,7 @@ module CASClient
         h = uri.query ? query_to_hash(uri.query) : {}
         h['destination'] = destination_url if destination_url
         h['url'] = follow_url if follow_url
+        h['gateway'] = '1' if @redirect_back_after_logout
         uri.query = hash_to_query(h)
         uri.to_s
       else
